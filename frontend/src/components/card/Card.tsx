@@ -21,6 +21,7 @@ const Card = ({
   const [editing, setEditing] = useState<boolean>(false);
   const [deleted, setDeleted] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const initialTitle = useRef(cardTitle);
 
   const handleUpdateCard = useCallback(async () => {
     const { data } = await updateCard({
@@ -53,7 +54,7 @@ const Card = ({
     console.log(data.deleteCard.success);
     setEditing(false);
     data.deleteCard.success && setDeleted(true);
-  }, []);
+  }, [id, deleteCard]);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setCardTitle(e.target.value);
@@ -67,9 +68,10 @@ const Card = ({
 
       if (e.key === "Escape") {
         setEditing(false);
+        setCardTitle(initialTitle.current);
       }
     },
-    [handleUpdateCard]
+    [handleUpdateCard, initialTitle]
   );
 
   if (deleted) return <></>;

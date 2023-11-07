@@ -1,17 +1,20 @@
 import { useQuery } from "@apollo/client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   DragDropContext,
   DraggableLocation,
   DropResult,
 } from "react-beautiful-dnd";
 import { GET_CARDS_QUERY } from "../../graphql/queries";
+import { useBoard, useBoardDispatch } from "../../hooks";
+import { BoardActionType } from "../../reducers";
 import { Card, Column as ColumnType } from "../../types";
 import Column from "../column/Column";
 
 const Board = (): React.ReactElement => {
   const { loading, error, data } = useQuery(GET_CARDS_QUERY);
-  const [columns, setColumns] = useState<ColumnType[]>([]);
+  const { columns } = useBoard();
+  const dispatch = useBoardDispatch();
 
   useEffect(() => {
     if (data) {
@@ -43,9 +46,12 @@ const Board = (): React.ReactElement => {
         },
       ];
 
-      setColumns(boardData);
+      dispatch({
+        type: BoardActionType.GetColumns,
+        payload: { columns: boardData },
+      });
     }
-  }, [data]);
+  }, [data, dispatch]);
 
   // Reorder cards in the same list
   const reorder = useCallback(
@@ -64,9 +70,12 @@ const Board = (): React.ReactElement => {
         return column;
       });
 
-      setColumns(updatedColumns);
+      dispatch({
+        type: BoardActionType.GetColumns,
+        payload: { columns: updatedColumns },
+      });
     },
-    [columns]
+    [columns, dispatch]
   );
 
   // Moves an item from one column to another.
@@ -101,14 +110,17 @@ const Board = (): React.ReactElement => {
         return column;
       });
 
-      setColumns(updatedColumns);
+      dispatch({
+        type: BoardActionType.GetColumns,
+        payload: { columns: updatedColumns },
+      });
     },
-    [columns]
+    [columns, dispatch]
   );
 
   const onDragEnd = useCallback(
     (result: DropResult) => {
-      console.log(result);
+      console.log("onDragEnd", result);
 
       const { source, destination } = result;
 
@@ -136,11 +148,7 @@ const Board = (): React.ReactElement => {
     <div className="board" style={{ display: "flex" }}>
       <DragDropContext onDragEnd={onDragEnd}>
         {columns?.map((column, idx) => (
-          <Column
-            key={column.title}
-            title={column.title}
-            cards={column.cards}
-          />
+          <Column key={column.title} id={column.title} cards={column.cards} />
         ))}
       </DragDropContext>
     </div>

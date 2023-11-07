@@ -5,13 +5,17 @@ import { Droppable } from "react-beautiful-dnd";
 import { ColumnProps } from "./Column.props";
 import { useMutation } from "@apollo/client";
 import { CREATE_CARD_MUTATION } from "../../graphql/mutations";
+import { useBoard, useBoardDispatch } from "../../hooks";
+import { BoardActionType } from "../../reducers";
 
 const Column = ({
-  title,
+  id,
   cards,
   defaultWidth = "33vw",
   defaultHeight = "100vh",
 }: ColumnProps): React.ReactElement => {
+  const { columns } = useBoard();
+  const dispatch = useBoardDispatch();
   const [allCards, setCards] = useState(cards);
   const [cardTitle, setCardTitle] = useState<string>("");
   const [createCard] = useMutation(CREATE_CARD_MUTATION);
@@ -21,13 +25,23 @@ const Column = ({
       variables: {
         title: cardTitle,
         description: "",
-        cardStatus: title,
+        cardStatus: id,
       },
     });
 
-    setCards([...allCards, { ...data.createCard.card }]);
+    const allCols = [...columns];
+    const columnIndex = columns.findIndex((x) => x.id === id);
+    allCols[columnIndex].cards = [...allCards, { ...data.createCard.card }];
+    setCards(allCols[columnIndex].cards);
+
+    dispatch({
+      type: BoardActionType.UpdateColumns,
+      payload: {
+        columns: allCols,
+      },
+    });
     setCardTitle("");
-  }, [allCards, createCard, cardTitle, title]);
+  }, [allCards, createCard, cardTitle, id, columns, dispatch]);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setCardTitle(e.target.value);
@@ -58,11 +72,11 @@ const Column = ({
     >
       <div className="flex justify-between">
         <h3 className="font-bold text-left text-gray-950 tracking-wide ml-4 mt-2">
-          {title}
+          {id}
         </h3>
       </div>
 
-      <Droppable droppableId={title}>
+      <Droppable droppableId={id}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}

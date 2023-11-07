@@ -3,8 +3,9 @@ import * as ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css"; // import tailwind styles
 import reportWebVitals from "./reportWebVitals";
+import { BoardContextProvider } from "./contexts";
 
-console.log(process.env.REACT_APP_API_URL)
+console.log(process.env.REACT_APP_API_URL);
 const client = new ApolloClient({
   uri: process.env.REACT_APP_API_URL,
   cache: new InMemoryCache(),
@@ -16,7 +17,9 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <ApolloProvider client={client}>
-    <App />
+    <BoardContextProvider>
+      <App />
+    </BoardContextProvider>
   </ApolloProvider>
 );
 

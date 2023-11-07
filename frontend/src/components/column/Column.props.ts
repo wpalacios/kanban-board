@@ -1,7 +1,7 @@
 import { Card } from "../../types";
 
 export interface ColumnProps {
-  title: string;
+  id: string;
   cards: Card[];
   defaultWidth?: number | string;
   defaultHeight?: number | string;
