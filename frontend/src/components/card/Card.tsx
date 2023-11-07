@@ -2,19 +2,27 @@
 import { useMutation } from "@apollo/client";
 import React, { ChangeEvent, useCallback, useRef, useState } from "react";
 import { Draggable } from "react-beautiful-dnd";
-import { UPDATE_CARD_MUTATION } from "../../graphql/mutations";
+import {
+  DELETE_CARD_MUTATION,
+  UPDATE_CARD_MUTATION,
+} from "../../graphql/mutations";
 import { CardProps } from "./Card.props";
 
-const Card = ({ id, title, description, index, cardStatus }: CardProps): React.ReactElement => {
+const Card = ({
+  id,
+  title,
+  description,
+  index,
+  cardStatus,
+}: CardProps): React.ReactElement => {
   const [updateCard] = useMutation(UPDATE_CARD_MUTATION);
+  const [deleteCard] = useMutation(DELETE_CARD_MUTATION);
   const [cardTitle, setCardTitle] = useState<string>(title);
   const [editing, setEditing] = useState<boolean>(false);
   const [deleted, setDeleted] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleUpdateCard = useCallback(async () => {
-    setCardTitle(cardTitle);
-
     const { data } = await updateCard({
       variables: {
         id,
@@ -35,8 +43,16 @@ const Card = ({ id, title, description, index, cardStatus }: CardProps): React.R
     }
   }, [editing]);
 
-  const handleDelete = useCallback(() => {
-    setDeleted(true);
+  const handleDelete = useCallback(async () => {
+    const { data } = await deleteCard({
+      variables: {
+        id,
+      },
+    });
+
+    console.log(data.deleteCard.success);
+    setEditing(false);
+    data.deleteCard.success && setDeleted(true);
   }, []);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {

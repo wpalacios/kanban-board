@@ -53,7 +53,7 @@ const Column = ({
       className="flex flex-col bg-slate-100	border border-black rounded-lg p-4 m-4 "
       style={{
         width: defaultWidth,
-        height: defaultHeight,
+        minHeight: defaultHeight,
       }}
     >
       <div className="flex justify-between">

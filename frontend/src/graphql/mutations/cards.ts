@@ -47,3 +47,11 @@ export const UPDATE_CARD_MUTATION = gql`
     }
   }
 `;
+
+export const DELETE_CARD_MUTATION = gql`
+  mutation deleteCardItem($id: ID) {
+    deleteCard(id: $id) {
+      success
+    }
+  }
+`;
